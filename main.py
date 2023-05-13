@@ -82,9 +82,8 @@ if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
             writer.writerow(columns)
             writer.writerows(data)
 
-df_isc = pd.read_csv('data/information_security_class.csv', delimiter=';')
-df_scr = pd.read_csv('data/security_class_requirements.csv', delimiter=';')
-df_scr.style.set_properties(**{'text-align': 'left'}, subset=['мера_защиты'])
+df_isc = pd.read_csv(file_path_isc, delimiter=';')
+df_scr = pd.read_csv(file_path_scr, delimiter=';')
 
 
 def show_security_class_requirements(*, significance_level: str, scale: str):
