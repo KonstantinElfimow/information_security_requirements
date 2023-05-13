@@ -3,58 +3,60 @@ from tkinter import ttk
 import pandas as pd
 
 
-def show_security_class(root: tk.Tk, *, significance_level: str, scale: str):
+df_1 = pd.read_csv('information_security_class.csv', delimiter=';')
+df_2 = pd.read_csv('security_class_requirements.csv', delimiter=';')
+
+
+def show_security_class_requirements(root: tk.Tk, *, significance_level: str, scale: str):
     if any(isinstance(child, tk.Text) for child in root.winfo_children()):
         for child in root.winfo_children():
             if isinstance(child, tk.Text):
-                child.config(yscrollcommand=None)
                 child.destroy()
                 break
 
     text = tk.Text(root)
     text.pack(fill=tk.BOTH, expand=True)
 
-    if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') and scale not in ('Федеральный', 'Региональный', 'Объектовый'):
-        text.insert(tk.END, "Введены неверные данные!")
+    if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') and scale not in ('федеральный', 'региональный', 'объектовый'):
+        text.insert(tk.END, 'Введены неверные данные!')
     else:
-        df = pd.read_csv('information_security_class.csv')
-        security_class = df.loc[df['Уровень значимости информации'] == significance_level, scale].values[0]
-        text.insert(tk.END, "Ваш класс защищённости: {}".format(security_class))
+        security_class = df_1.loc[df_1['уровень_значимости'] == significance_level, scale].values[0]
+
+        requirements = (df_2.loc[df_2[security_class] == 1, ['номер_меры', 'мера_защиты']]).to_string()
+        text.insert(tk.END, 'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, requirements))
 
 
 def create_window():
     root = tk.Tk()
     root.geometry('500x500')
-
-    label1 = tk.Label(root, text="Выберите уровень значимости:")
+    
+    main_label = tk.Label(root, text='По приказу №17 ФСТЭК России\n')
+    main_label.pack()
+    
+    label1 = tk.Label(root, text='Выберите уровень значимости:')
     label1.pack()
 
     # Создание вертикального скролла
     scrollbar = tk.Scrollbar(root)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    security_classes = ['УЗ 1', 'УЗ 2', 'УЗ 3']
-    combo1 = ttk.Combobox(root, values=security_classes)
+    significance_levels = ['УЗ 1', 'УЗ 2', 'УЗ 3']
+    combo1 = ttk.Combobox(root, values=significance_levels)
     combo1.pack()
 
-    label2 = tk.Label(root, text="Выберите масштаб:")
+    label2 = tk.Label(root, text='Выберите масштаб:')
     label2.pack()
 
-    scales = ['Федеральный', 'Региональный', 'Объектовый']
+    scales = ['федеральный', 'региональный', 'объектовый']
     combo2 = ttk.Combobox(root, values=scales)
     combo2.pack()
 
-    # label3 = tk.Label(root, text="Введите текст 3:")
-    # label3.pack()
-    #
-    # entry3 = tk.Entry(root)
-    # entry3.pack()
-
-    button = tk.Button(root, text="Вывести текст", command=lambda: show_security_class(root, significance_level=combo1.get(),
-                                                                                       scale=combo2.get()))
+    button = tk.Button(root, text='Вывести текст', command=lambda: show_security_class_requirements(root,
+                                                                                                    significance_level=combo1.get(),
+                                                                                                    scale=combo2.get()))
     button.pack()
 
-    # button_next = tk.Button(root, text="Далее", command=next_form)
+    # button_next = tk.Button(root, text='Далее', command=next_form)
     # button_next.pack()
 
     root.mainloop()
@@ -63,10 +65,10 @@ def create_window():
 # def next_form():
 #     root = tk.Tk()
 #
-#     label = tk.Label(root, text="Новая форма")
+#     label = tk.Label(root, text='Новая форма')
 #     label.pack()
 #
-#     button_back = tk.Button(root, text="Назад", command=root.destroy)
+#     button_back = tk.Button(root, text='Назад', command=root.destroy)
 #     button_back.pack()
 #
 #     root.mainloop()
