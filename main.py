@@ -1,10 +1,10 @@
+import io
 import os
 import tkinter as tk
 from tkinter import ttk
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import json
 import csv
 
 url = 'https://fstec.ru/dokumenty/vse-dokumenty/prikazy/prikaz-fstek-rossii-ot-11-fevralya-2013-g-n-17'
@@ -36,7 +36,7 @@ if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
 
     tables = soup.find_all('table', class_='sltable')
 
-    if True:
+    if not os.path.isfile(file_path_isc):
         table_isc = tables[0]
         table_rows = table_isc.find('tbody').find_all('tr')
 
@@ -51,15 +51,40 @@ if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
 
             data.append([v1, v2, v3, v4])
 
-        with open(f'data/information_security_class.csv', mode='w', encoding='utf-8-sig', newline='') as csvfile:
+        with open(file_path_isc, mode='w', encoding='utf-8-sig', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter=';')
             columns = ['уровень_значимости', 'федеральный', 'региональный', 'объектовый']
             writer.writerow(columns)
             writer.writerows(data)
 
-exit()
-df_isc = pd.read_csv('information_security_class.csv', delimiter=';')
-df_scr = pd.read_csv('security_class_requirements.csv', delimiter=';')
+    if not os.path.isfile(file_path_scr):
+        table_scr = tables[1]
+        table_rows = table_scr.find('tbody').find_all('tr')
+
+        data = []
+        for row in table_rows:
+            attr_values = row.find_all('td')
+
+            if len(attr_values) != 5:
+                continue
+
+            v1 = attr_values[0].text.replace(' ', ' ').strip()
+            v2 = attr_values[1].text.replace(' ', ' ').strip()
+            v3 = bool(attr_values[2].text.strip())
+            v4 = bool(attr_values[3].text.strip())
+            v5 = bool(attr_values[4].text.strip())
+
+            data.append([v1, v2, v3, v4, v5])
+        print(data)
+        with open(file_path_scr, mode='w', encoding='utf-8-sig', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=';')
+            columns = ['номер_меры', 'мера_защиты', 'К3', 'К2', 'К1']
+            writer.writerow(columns)
+            writer.writerows(data)
+
+df_isc = pd.read_csv('data/information_security_class.csv', delimiter=';')
+df_scr = pd.read_csv('data/security_class_requirements.csv', delimiter=';')
+df_scr.style.set_properties(**{'text-align': 'left'}, subset=['мера_защиты'])
 
 
 def show_security_class_requirements(*, significance_level: str, scale: str):
@@ -69,27 +94,27 @@ def show_security_class_requirements(*, significance_level: str, scale: str):
     label = tk.Label(root, text='Требования по приказу №17 ФСТЭК России')
     label.pack()
 
-    text = tk.Text(root)
-    text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    # Создание вертикального скролла
-    scrollbar = tk.Scrollbar(root, command=text.yview)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-    # Связывание скролла с текстовым полем
-    text.config(yscrollcommand=scrollbar.set)
+    text = tk.Text(root, padx=15, pady=15)
+    text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') and scale not in (
             'федеральный', 'региональный', 'объектовый'):
         text.insert(tk.END, 'Введены неверные данные!')
     else:
         security_class = df_isc.loc[df_isc['уровень_значимости'] == significance_level, scale].values[0]
-        requirements = (df_scr.loc[df_scr[security_class] == 1, ['номер_меры', 'мера_защиты']]).to_string()
+        requirements = (df_scr.loc[df_scr[security_class], ['номер_меры', 'мера_защиты']])
+
+        stringIO = io.StringIO()
+        for index, row in requirements.iterrows():
+            number_measure = row['номер_меры']
+            protective_measure = row['мера_защиты']
+            stringIO.write('- {}: {}\n'.format(number_measure, protective_measure))
+
         text.insert(tk.END,
-                    'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, requirements))
+                    'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, stringIO.getvalue()))
 
     button_back = tk.Button(root, text='Назад', command=root.destroy)
-    button_back.pack()
+    button_back.pack(side=tk.LEFT, fill=tk.Y)
 
     root.mainloop()
 
