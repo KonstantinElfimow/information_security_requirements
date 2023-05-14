@@ -96,14 +96,98 @@ def prepare_data_from_order():
             write_csv(file_path_scr, columns, data)
 
 
+file_path_req_class_1 = 'data/requirements_class_1.csv'
+file_path_req_class_2 = 'data/requirements_class_2.csv'
+file_path_req_class_3 = 'data/requirements_class_3.csv'
+
+
 def prepare_data_from_guidance_document():
     url = 'https://fstec.ru/dokumenty/vse-dokumenty/spetsialnye-normativnye-dokumenty/rukovodyashchij-dokument-ot-30' \
           '-marta-1992-g-3 '
 
+    file_path_html_document = 'index_document.html'
+    if not os.path.isfile(file_path_html_document):
+        pull_html(url, file_path_html_document)
+
+    if not os.path.isfile(file_path_req_class_1) or not os.path.isfile(file_path_req_class_2) or not os.path.isfile(file_path_req_class_3):
+        with open(file_path_html_document, mode='r', encoding='utf-8') as file:
+            src = file.read()
+
+        soup = BeautifulSoup(src, 'lxml')
+
+        tables = soup.find_all('table', class_='sltable')
+
+        if not os.path.isfile(file_path_req_class_3):
+            table_req_class_3 = tables[0]
+            table_rows = table_req_class_3.find('tbody').find_all('tr')
+
+            columns = ['подсистемы_и_требования', '3Б', '3А']
+
+            data = []
+            for row in table_rows[2:]:
+                attr_values = row.find_all('td')
+
+                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
+                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
+
+                data.append([v1, v2, v3])
+
+            write_csv(file_path_req_class_3, columns, data)
+
+        if not os.path.isfile(file_path_req_class_2):
+            table_req_class_2 = tables[1]
+            table_rows = table_req_class_2.find('tbody').find_all('tr')
+
+            columns = ['подсистемы_и_требования', '2Б', '2А']
+
+            data = []
+            for row in table_rows[2:]:
+                attr_values = row.find_all('td')
+
+                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
+                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
+
+                data.append([v1, v2, v3])
+
+            write_csv(file_path_req_class_2, columns, data)
+
+        if not os.path.isfile(file_path_req_class_1):
+            table_req_class_1 = tables[2]
+            table_rows = table_req_class_1.find('tbody').find_all('tr')
+
+            columns = ['подсистемы_и_требования', '1Д', '1Г', '1В', '1Б', '1А']
+
+            data = []
+            for row in table_rows[2:]:
+                attr_values = row.find_all('td')
+
+                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
+                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
+                v4_attr = attr_values[3].text.replace(' ', ' ').strip()
+                v4 = True if v4_attr == '+' else False if v4_attr == '-' else None
+                v5_attr = attr_values[4].text.replace(' ', ' ').strip()
+                v5 = True if v5_attr == '+' else False if v5_attr == '-' else None
+                v6_attr = attr_values[5].text.replace(' ', ' ').strip()
+                v6 = True if v6_attr == '+' else False if v6_attr == '-' else None
+
+                data.append([v1, v2, v3, v4, v5, v6])
+
+            write_csv(file_path_req_class_1, columns, data)
+
 
 def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame, significance_level: str, scale: str):
     root = tk.Tk()
-    root.geometry('1000x1000')
+
+    root.attributes('-fullscreen', True)
 
     label = tk.Label(root, text='Требования по приказу №17 ФСТЭК России')
     label.pack()
@@ -138,8 +222,23 @@ def create_window():
     df_isc = pd.read_csv(file_path_isc, delimiter=';')
     df_scr = pd.read_csv(file_path_scr, delimiter=';')
 
+    df_req_class_1 = pd.read_csv(file_path_req_class_1, delimiter=';', keep_default_na=False, na_values='')
+    df_req_class_2 = pd.read_csv(file_path_req_class_2, delimiter=';', keep_default_na=False, na_values='')
+    df_req_class_3 = pd.read_csv(file_path_req_class_3, delimiter=';', keep_default_na=False, na_values='')
+
+    print(df_req_class_3)
     root = tk.Tk()
-    root.geometry('500x300')
+
+    # Get the width and height of the screen
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    # Calculate the x and y coordinates of the top-left corner of the window
+    x = (screen_width - root.winfo_reqwidth() - 200) / 2
+    y = (screen_height - root.winfo_reqheight() - 200) / 2
+
+    # Set the position of the window
+    root.geometry('400x400+%d+%d' % (x, y))
 
     main_label = tk.Label(root, text='Информационная система')
     main_label.pack()
