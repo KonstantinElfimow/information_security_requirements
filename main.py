@@ -7,7 +7,6 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-
 headers = {
     'accept': '*/*',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 '
@@ -109,7 +108,8 @@ def prepare_data_from_guidance_document():
     if not os.path.isfile(file_path_html_document):
         pull_html(url, file_path_html_document)
 
-    if not os.path.isfile(file_path_req_class_1) or not os.path.isfile(file_path_req_class_2) or not os.path.isfile(file_path_req_class_3):
+    if not os.path.isfile(file_path_req_class_1) or not os.path.isfile(file_path_req_class_2) or not os.path.isfile(
+            file_path_req_class_3):
         with open(file_path_html_document, mode='r', encoding='utf-8') as file:
             src = file.read()
 
@@ -195,7 +195,7 @@ def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame,
     text = tk.Text(root, padx=15, pady=15)
     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-    if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') and scale not in (
+    if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') or scale not in (
             'федеральный', 'региональный', 'объектовый'):
         text.insert(tk.END, 'Введены неверные данные!')
     else:
@@ -211,6 +211,41 @@ def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame,
         text.insert(tk.END,
                     'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class,
                                                                                     stringIO.getvalue()))
+
+    button_back = tk.Button(root, text='Назад', command=root.destroy)
+    button_back.pack(side=tk.LEFT, fill=tk.Y)
+
+    root.mainloop()
+
+
+def show_automated_system_requirements(df_req_class_1: pd.DataFrame, df_req_class_2: pd.DataFrame,
+                                       df_req_class_3: pd.DataFrame, privacy_level: str, power: str, mode: str):
+    root = tk.Tk()
+
+    root.attributes('-fullscreen', True)
+
+    label = tk.Label(root, text='Требования по руководящему документу (Автоматизированные системы. Защита от '
+                                'несанкционированного доступа к информации) ФСТЭК России')
+    label.pack()
+
+    text = tk.Text(root, padx=15, pady=15)
+    text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    if privacy_level not in ('один', 'различный') or power not in ('да', 'нет') or mode not in ('индивидуальный', 'коллективный'):
+        text.insert(tk.END, 'Введены неверные данные!')
+    else:
+        automated_system_class = '?'
+        requirements = pd.DataFrame({})
+
+        stringIO = io.StringIO()
+        for index, row in requirements.iterrows():
+            subsystems_and_requirements = row['подсистемы_и_требования']
+            stringIO.write('- {}\n'.format(subsystems_and_requirements))
+
+        text.insert(tk.END,
+                    'Ваш класс АС:\n{}\nТребования по защите информации от НСД для АС:\n{}'.format(
+                        automated_system_class,
+                        stringIO.getvalue()))
 
     button_back = tk.Button(root, text='Назад', command=root.destroy)
     button_back.pack(side=tk.LEFT, fill=tk.Y)
@@ -268,10 +303,10 @@ def create_window():
     combo_privacy_level = ttk.Combobox(root, values=privacy_levels)
     combo_privacy_level.pack()
 
-    label4 = tk.Label(root, text='Уровень полномочий субъектов доступа АС на доступ к конфиденциальной информации:')
+    label4 = tk.Label(root, text='Равные права доступа (полномочия) ко всей информации АС:')
     label4.pack()
 
-    powers = ['']
+    powers = ['да', 'нет']
     combo_power = ttk.Combobox(root, values=powers)
     combo_power.pack()
 
@@ -281,6 +316,12 @@ def create_window():
     modes = ['индивидуальный', 'коллективный']
     combo_modes = ttk.Combobox(root, values=modes)
     combo_modes.pack()
+
+    button = tk.Button(root, text='Вывести требования',
+                       command=lambda: show_automated_system_requirements(df_req_class_1, df_req_class_2,
+                                                                          df_req_class_3, combo_privacy_level.get(),
+                                                                          combo_power.get(), combo_modes.get()))
+    button.pack()
 
     root.mainloop()
 
