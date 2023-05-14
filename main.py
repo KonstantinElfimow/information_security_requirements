@@ -195,44 +195,126 @@ def prepare_data_from_guidance_document():
             write_csv(MyFiles.FILE_PATH_REQ_GROUP_1, ReservedValuesInTables.COLUMNS_REQ_GROUP_1, data)
 
 
-def show_security_class_requirements(significance_level: str, scale: str):
+# def show_security_class_requirements(significance_level: str, scale: str):
+#     df_isc = pd.read_csv(MyFiles.FILE_PATH_ISC, delimiter=';')
+#     df_scr = pd.read_csv(MyFiles.FILE_PATH_SCR, delimiter=';')
+#
+#     root = tk.Tk()
+#
+#     root.attributes('-fullscreen', True)
+#
+#     label = tk.Label(root, text='Требования по приказу №17 ФСТЭК России')
+#     label.pack()
+#
+#     text = tk.Text(root, padx=15, pady=15)
+#     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+#
+#     button_back = tk.Button(root, text='Назад', command=root.destroy)
+#     button_back.pack(side=tk.LEFT, fill=tk.Y)
+#
+#     if significance_level not in ReservedValuesInTables.SIGNIFICANCE_LEVEL_VALUES or \
+#             scale not in ReservedValuesInTables.SCALE_VALUES:
+#         text.insert(tk.END, 'Введены неверные данные!')
+#     else:
+#         security_class = df_isc.loc[df_isc['уровень_значимости'] == significance_level, scale].values[0]
+#         requirements = (df_scr.loc[df_scr[security_class], ['номер_меры', 'мера_защиты']])
+#
+#         stringIO = io.StringIO()
+#         for index, row in requirements.iterrows():
+#             number_measure = row['номер_меры']
+#             protective_measure = row['мера_защиты']
+#             stringIO.write('- {}: {}\n'.format(number_measure, protective_measure))
+#
+#         text.insert(
+#             tk.END, 'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, stringIO.getvalue())
+#         )
+#
+#     root.mainloop()
+
+
+# def show_automated_system_requirements(privacy_level: str, power: str, mode: str, secrecy: str):
+#     df_define_group = pd.DataFrame({
+#         'группа': ReservedValuesInTables.GROUP_VALUES,
+#         'уровень_конфиденциальности': ['различный', 'различный', 'один'],
+#         'равные_полномочие': ['нет', 'да', 'да'],
+#         'режим_обработки': ['коллективный', 'коллективный', 'индивидуальный']
+#     })
+#
+#     df_define_class = pd.DataFrame({
+#         'секретность_данных': ReservedValuesInTables.SECRECY_VALUES,
+#         1: ['1А', '1Б', '1В', '1Г', '1Д'],
+#         2: ['2А', '2А', '2А', '2Б', '2Б'],
+#         3: ['3А', '3А', '3А', '3Б', '3Б']
+#     })
+#
+#     root = tk.Tk()
+#     root.attributes('-fullscreen', True)
+#
+#     label = tk.Label(root, text='Требования по руководящему документу (Автоматизированные системы. Защита от '
+#                                 'несанкционированного доступа к информации) ФСТЭК России')
+#     label.pack()
+#
+#     text = tk.Text(root, padx=15, pady=15)
+#     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+#
+#     button_back = tk.Button(root, text='Назад', command=root.destroy)
+#     button_back.pack(side=tk.LEFT, fill=tk.Y)
+#
+#     if privacy_level not in ReservedValuesInTables.PRIVACY_LEVEL_VALUES or \
+#             power not in ReservedValuesInTables.POWER_VALUES or \
+#             mode not in ReservedValuesInTables.MODE_VALUES:
+#         text.insert(tk.END, 'Введены неверные данные!')
+#     else:
+#         automated_system_group = df_define_group.loc[(df_define_group['уровень_конфиденциальности'] == privacy_level) &
+#                                                      (df_define_group['равные_полномочие'] == power) &
+#                                                      (df_define_group['режим_обработки'] == mode), 'группа']
+#         if len(automated_system_group) < 1:
+#             text.insert(tk.END, 'Введенные данные не удовлетворяют ни одной из групп АС!')
+#         else:
+#             automated_system_group = automated_system_group.values[0]
+#             automated_system_class = \
+#                 df_define_class.loc[df_define_class['секретность_данных'] == secrecy, automated_system_group].values[0]
+#
+#             file = getattr(MyFiles, f'FILE_PATH_REQ_GROUP_{automated_system_group}', None)
+#             if file is None:
+#                 raise FileExistsError('Файл был удалён или перенесён в другую директорию!')
+#
+#             df_group_requirements = pd.read_csv(file, delimiter=';', keep_default_na=False, na_values='')
+#             requirements = df_group_requirements.loc[df_group_requirements[automated_system_class].isna() |
+#                                                      df_group_requirements[automated_system_class],
+#                                                      ['подсистемы_и_требования']]
+#
+#             stringIO = io.StringIO()
+#             for index, row in requirements.iterrows():
+#                 subsystems_and_requirements = row['подсистемы_и_требования']
+#                 stringIO.write('- {}\n'.format(subsystems_and_requirements))
+#
+#             text.insert(
+#                 tk.END,
+#                 'Ваш класс АС:\n{}\nТребования по защите информации от НСД для АС:\n{}'.format(automated_system_class,
+#                                                                                                stringIO.getvalue())
+#             )
+#
+#     root.mainloop()
+
+def save_data(path: str, data: str):
+    dirs = path.split('/')
+    dirs.pop()
+
+    current_dir = io.StringIO()
+    for d in dirs:
+        current_dir.write(f'{d}/')
+        if not os.path.exists(current_dir.getvalue()):
+            os.makedirs(current_dir.getvalue())
+
+    with open(path, mode='w', encoding='windows-1251') as file:
+        file.write(data)
+
+
+def show_requirements(significance_level: str, scale: str, privacy_level: str, power: str, mode: str, secrecy: str):
     df_isc = pd.read_csv(MyFiles.FILE_PATH_ISC, delimiter=';')
     df_scr = pd.read_csv(MyFiles.FILE_PATH_SCR, delimiter=';')
 
-    root = tk.Tk()
-
-    root.attributes('-fullscreen', True)
-
-    label = tk.Label(root, text='Требования по приказу №17 ФСТЭК России')
-    label.pack()
-
-    text = tk.Text(root, padx=15, pady=15)
-    text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
-    button_back = tk.Button(root, text='Назад', command=root.destroy)
-    button_back.pack(side=tk.LEFT, fill=tk.Y)
-
-    if significance_level not in ReservedValuesInTables.SIGNIFICANCE_LEVEL_VALUES or \
-            scale not in ReservedValuesInTables.SCALE_VALUES:
-        text.insert(tk.END, 'Введены неверные данные!')
-    else:
-        security_class = df_isc.loc[df_isc['уровень_значимости'] == significance_level, scale].values[0]
-        requirements = (df_scr.loc[df_scr[security_class], ['номер_меры', 'мера_защиты']])
-
-        stringIO = io.StringIO()
-        for index, row in requirements.iterrows():
-            number_measure = row['номер_меры']
-            protective_measure = row['мера_защиты']
-            stringIO.write('- {}: {}\n'.format(number_measure, protective_measure))
-
-        text.insert(
-            tk.END, 'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, stringIO.getvalue())
-        )
-
-    root.mainloop()
-
-
-def show_automated_system_requirements(privacy_level: str, power: str, mode: str, secrecy: str):
     df_define_group = pd.DataFrame({
         'группа': ReservedValuesInTables.GROUP_VALUES,
         'уровень_конфиденциальности': ['различный', 'различный', 'один'],
@@ -250,21 +332,25 @@ def show_automated_system_requirements(privacy_level: str, power: str, mode: str
     root = tk.Tk()
     root.attributes('-fullscreen', True)
 
-    label = tk.Label(root, text='Требования по руководящему документу (Автоматизированные системы. Защита от '
-                                'несанкционированного доступа к информации) ФСТЭК России')
+    label = tk.Label(root, text='Требования по документам ФСТЭК России')
     label.pack()
 
     text = tk.Text(root, padx=15, pady=15)
     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     button_back = tk.Button(root, text='Назад', command=root.destroy)
-    button_back.pack(side=tk.LEFT, fill=tk.Y)
+    button_back.pack()
 
-    if privacy_level not in ReservedValuesInTables.PRIVACY_LEVEL_VALUES or\
-            power not in ReservedValuesInTables.POWER_VALUES or\
+    if significance_level not in ReservedValuesInTables.SIGNIFICANCE_LEVEL_VALUES or \
+            scale not in ReservedValuesInTables.SCALE_VALUES or \
+            privacy_level not in ReservedValuesInTables.PRIVACY_LEVEL_VALUES or \
+            power not in ReservedValuesInTables.POWER_VALUES or \
             mode not in ReservedValuesInTables.MODE_VALUES:
         text.insert(tk.END, 'Введены неверные данные!')
     else:
+        security_class = df_isc.loc[df_isc['уровень_значимости'] == significance_level, scale].values[0]
+        order_requirements = (df_scr.loc[df_scr[security_class], ['номер_меры', 'мера_защиты']])
+
         automated_system_group = df_define_group.loc[(df_define_group['уровень_конфиденциальности'] == privacy_level) &
                                                      (df_define_group['равные_полномочие'] == power) &
                                                      (df_define_group['режим_обработки'] == mode), 'группа']
@@ -280,20 +366,34 @@ def show_automated_system_requirements(privacy_level: str, power: str, mode: str
                 raise FileExistsError('Файл был удалён или перенесён в другую директорию!')
 
             df_group_requirements = pd.read_csv(file, delimiter=';', keep_default_na=False, na_values='')
-            requirements = df_group_requirements.loc[df_group_requirements[automated_system_class].isna() |
-                                                     df_group_requirements[automated_system_class],
-                                                     ['подсистемы_и_требования']]
+            document_requirements = df_group_requirements.loc[df_group_requirements[automated_system_class].isna() |
+                                                              df_group_requirements[automated_system_class],
+                                                              ['подсистемы_и_требования']]
 
             stringIO = io.StringIO()
-            for index, row in requirements.iterrows():
-                subsystems_and_requirements = row['подсистемы_и_требования']
-                stringIO.write('- {}\n'.format(subsystems_and_requirements))
 
-            text.insert(
-                tk.END,
-                'Ваш класс АС:\n{}\nТребования по защите информации от НСД для АС:\n{}'.format(automated_system_class,
-                                                                                               stringIO.getvalue())
-            )
+            stringIO.write('Ваш класс защищённости:\n{}\n'.format(security_class))
+            for index, row in order_requirements.iterrows():
+                number_measure = row['номер_меры']
+                protective_measure = row['мера_защиты']
+                stringIO.write('- {}: {}\n'.format(number_measure, protective_measure))
+            stringIO.write('Ваш класс АС:\n{}\n'
+                           'Требования по защите информации от НСД для АС:\n'.format(automated_system_class))
+            for index, row in document_requirements.iterrows():
+                subsystems_and_requirements = row['подсистемы_и_требования']
+                stringIO.write('{}\n'.format(subsystems_and_requirements))
+
+            text.insert(tk.END, stringIO.getvalue())
+
+            label = tk.Label(root, text='Сохранить как:')
+            label.pack()
+
+            entry = tk.Entry(root)
+            entry.insert(0, 'output/your_requirements.txt')
+            entry.pack()
+
+            button = tk.Button(root, text='Сохранить', command=lambda: save_data(entry.get(), stringIO.getvalue()))
+            button.pack()
 
     root.mainloop()
 
@@ -301,11 +401,9 @@ def show_automated_system_requirements(privacy_level: str, power: str, mode: str
 def create_window():
     root = tk.Tk()
 
-    # Get the width and height of the screen
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
 
-    # Calculate the x and y coordinates of the top-left corner of the window
     x = (screen_width - root.winfo_reqwidth() - 400) / 2
     y = (screen_height - root.winfo_reqheight() - 400) / 2
 
@@ -328,10 +426,10 @@ def create_window():
     combo_scale = ttk.Combobox(root, values=ReservedValuesInTables.SCALE_VALUES)
     combo_scale.pack()
 
-    button = tk.Button(root, text='Вывести требования',
-                       command=lambda: show_security_class_requirements(combo_significance_level.get(),
-                                                                        combo_scale.get()))
-    button.pack()
+    # button = tk.Button(root, text='Вывести требования',
+    #                    command=lambda: show_security_class_requirements(combo_significance_level.get(),
+    #                                                                     combo_scale.get()))
+    # button.pack()
 
     title_2 = tk.Label(root, text='\nКлассификация AC и требования по защите информации\n',
                        font=("Helvetica", 10, "bold"))
@@ -361,9 +459,16 @@ def create_window():
     combo_secrecy = ttk.Combobox(root, values=ReservedValuesInTables.SECRECY_VALUES)
     combo_secrecy.pack()
 
-    button = tk.Button(root, text='Вывести требования',
-                       command=lambda: show_automated_system_requirements(combo_privacy_level.get(), combo_power.get(),
-                                                                          combo_modes.get(), combo_secrecy.get()))
+    # button = tk.Button(root, text='Вывести требования',
+    #                    command=lambda: show_automated_system_requirements(combo_privacy_level.get(), combo_power.get(),
+    #                                                                       combo_modes.get(), combo_secrecy.get()))
+    # button.pack()
+
+    button = tk.Button(root, text='Вывести все требования',
+                       command=lambda: show_requirements(combo_significance_level.get(),
+                                                         combo_scale.get(), combo_privacy_level.get(),
+                                                         combo_power.get(),
+                                                         combo_modes.get(), combo_secrecy.get()))
     button.pack()
 
     root.mainloop()
