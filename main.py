@@ -212,7 +212,8 @@ def show_security_class_requirements(significance_level: str, scale: str):
     button_back = tk.Button(root, text='Назад', command=root.destroy)
     button_back.pack(side=tk.LEFT, fill=tk.Y)
 
-    if significance_level not in ReservedValuesInTables.SCALE_VALUES or scale not in ReservedValuesInTables.SCALE_VALUES:
+    if significance_level not in ReservedValuesInTables.SIGNIFICANCE_LEVEL_VALUES or \
+            scale not in ReservedValuesInTables.SCALE_VALUES:
         text.insert(tk.END, 'Введены неверные данные!')
     else:
         security_class = df_isc.loc[df_isc['уровень_значимости'] == significance_level, scale].values[0]
@@ -312,7 +313,7 @@ def create_window():
     root.geometry('600x500+%d+%d' % (x, y))
 
     title_1 = tk.Label(root, text='\nТребования к мерам защиты информации, содержащейся в информационной системе\n',
-                       font=("Helvetica", 18, "bold"))
+                       font=("Helvetica", 10, "bold"))
     title_1.pack()
 
     label1 = tk.Label(root, text='Выберите уровень значимости информации:')
@@ -333,7 +334,7 @@ def create_window():
     button.pack()
 
     title_2 = tk.Label(root, text='\nКлассификация AC и требования по защите информации\n',
-                       font=("Helvetica", 18, "bold"))
+                       font=("Helvetica", 10, "bold"))
     title_2.pack()
 
     label3 = tk.Label(root, text='Наличие в АС информации различного уровня конфиденциальности:')
