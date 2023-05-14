@@ -226,7 +226,6 @@ def create_window():
     df_req_class_2 = pd.read_csv(file_path_req_class_2, delimiter=';', keep_default_na=False, na_values='')
     df_req_class_3 = pd.read_csv(file_path_req_class_3, delimiter=';', keep_default_na=False, na_values='')
 
-    print(df_req_class_3)
     root = tk.Tk()
 
     # Get the width and height of the screen
@@ -234,21 +233,17 @@ def create_window():
     screen_height = root.winfo_screenheight()
 
     # Calculate the x and y coordinates of the top-left corner of the window
-    x = (screen_width - root.winfo_reqwidth() - 200) / 2
-    y = (screen_height - root.winfo_reqheight() - 200) / 2
+    x = (screen_width - root.winfo_reqwidth() - 400) / 2
+    y = (screen_height - root.winfo_reqheight() - 400) / 2
 
     # Set the position of the window
-    root.geometry('400x400+%d+%d' % (x, y))
+    root.geometry('600x400+%d+%d' % (x, y))
 
     main_label = tk.Label(root, text='Информационная система')
     main_label.pack()
 
     label1 = tk.Label(root, text='Выберите уровень значимости:')
     label1.pack()
-
-    # Создание вертикального скролла
-    scrollbar = tk.Scrollbar(root)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     significance_levels = ['УЗ 1', 'УЗ 2', 'УЗ 3']
     combo_significance_level = ttk.Combobox(root, values=significance_levels)
@@ -265,6 +260,27 @@ def create_window():
                        command=lambda: show_security_class_requirements(df_isc, df_scr, combo_significance_level.get(),
                                                                         combo_scale.get()))
     button.pack()
+
+    label3 = tk.Label(root, text='\nНаличие в АС информации различного уровня конфиденциальности:')
+    label3.pack()
+
+    privacy_levels = ['один', 'различный']
+    combo_privacy_level = ttk.Combobox(root, values=privacy_levels)
+    combo_privacy_level.pack()
+
+    label4 = tk.Label(root, text='Уровень полномочий субъектов доступа АС на доступ к конфиденциальной информации:')
+    label4.pack()
+
+    powers = ['']
+    combo_power = ttk.Combobox(root, values=powers)
+    combo_power.pack()
+
+    label5 = tk.Label(root, text='Режим обработки данных в АС:')
+    label5.pack()
+
+    modes = ['индивидуальный', 'коллективный']
+    combo_modes = ttk.Combobox(root, values=modes)
+    combo_modes.pack()
 
     root.mainloop()
 
