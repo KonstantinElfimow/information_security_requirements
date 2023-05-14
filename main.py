@@ -14,6 +14,15 @@ headers = {
 }
 
 
+class MyFiles:
+    FILE_PATH_ISC: str = 'data/information_security_class.csv'
+    FILE_PATH_SCR: str = 'data/security_class_requirements.csv'
+
+    FILE_PATH_REQ_GROUP_1: str = 'data/requirements_group_1.csv'
+    FILE_PATH_REQ_GROUP_2: str = 'data/requirements_group_2.csv'
+    FILE_PATH_REQ_GROUP_3: str = 'data/requirements_group_3.csv'
+
+
 def pull_html(url: str, file_path: str) -> bool:
     # Отключение проверки сертификата SSL
     requests.packages.urllib3.disable_warnings()
@@ -33,10 +42,6 @@ def write_csv(file_path: str, columns: list, data: list) -> bool:
     return True
 
 
-file_path_isc = 'data/information_security_class.csv'
-file_path_scr = 'data/security_class_requirements.csv'
-
-
 def prepare_data_from_order():
     url = 'https://fstec.ru/dokumenty/vse-dokumenty/prikazy/prikaz-fstek-rossii-ot-11-fevralya-2013-g-n-17'
 
@@ -44,7 +49,7 @@ def prepare_data_from_order():
     if not os.path.isfile(file_path_html_order):
         pull_html(url, file_path_html_order)
 
-    if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
+    if not os.path.isfile(MyFiles.FILE_PATH_ISC) or not os.path.isfile(MyFiles.FILE_PATH_SCR):
         with open(file_path_html_order, mode='r', encoding='utf-8') as file:
             src = file.read()
 
@@ -52,7 +57,7 @@ def prepare_data_from_order():
 
         tables = soup.find_all('table', class_='sltable')
 
-        if not os.path.isfile(file_path_isc):
+        if not os.path.isfile(MyFiles.FILE_PATH_ISC):
             table_isc = tables[0]
             table_rows = table_isc.find('tbody').find_all('tr')
 
@@ -69,9 +74,9 @@ def prepare_data_from_order():
 
                 data.append([v1, v2, v3, v4])
 
-            write_csv(file_path_isc, columns, data)
+            write_csv(MyFiles.FILE_PATH_ISC, columns, data)
 
-        if not os.path.isfile(file_path_scr):
+        if not os.path.isfile(MyFiles.FILE_PATH_SCR):
             table_scr = tables[1]
             table_rows = table_scr.find('tbody').find_all('tr')
 
@@ -92,12 +97,7 @@ def prepare_data_from_order():
 
                 data.append([v1, v2, v3, v4, v5])
 
-            write_csv(file_path_scr, columns, data)
-
-
-file_path_req_class_1 = 'data/requirements_class_1.csv'
-file_path_req_class_2 = 'data/requirements_class_2.csv'
-file_path_req_class_3 = 'data/requirements_class_3.csv'
+            write_csv(MyFiles.FILE_PATH_SCR, columns, data)
 
 
 def prepare_data_from_guidance_document():
@@ -108,8 +108,8 @@ def prepare_data_from_guidance_document():
     if not os.path.isfile(file_path_html_document):
         pull_html(url, file_path_html_document)
 
-    if not os.path.isfile(file_path_req_class_1) or not os.path.isfile(file_path_req_class_2) or not os.path.isfile(
-            file_path_req_class_3):
+    if not os.path.isfile(MyFiles.FILE_PATH_REQ_GROUP_1) or not os.path.isfile(MyFiles.FILE_PATH_REQ_GROUP_2) or not os.path.isfile(
+            MyFiles.FILE_PATH_REQ_GROUP_3):
         with open(file_path_html_document, mode='r', encoding='utf-8') as file:
             src = file.read()
 
@@ -117,9 +117,9 @@ def prepare_data_from_guidance_document():
 
         tables = soup.find_all('table', class_='sltable')
 
-        if not os.path.isfile(file_path_req_class_3):
-            table_req_class_3 = tables[0]
-            table_rows = table_req_class_3.find('tbody').find_all('tr')
+        if not os.path.isfile(MyFiles.FILE_PATH_REQ_GROUP_3):
+            table_req_group_3 = tables[0]
+            table_rows = table_req_group_3.find('tbody').find_all('tr')
 
             columns = ['подсистемы_и_требования', '3Б', '3А']
 
@@ -135,11 +135,11 @@ def prepare_data_from_guidance_document():
 
                 data.append([v1, v2, v3])
 
-            write_csv(file_path_req_class_3, columns, data)
+            write_csv(MyFiles.FILE_PATH_REQ_GROUP_3, columns, data)
 
-        if not os.path.isfile(file_path_req_class_2):
-            table_req_class_2 = tables[1]
-            table_rows = table_req_class_2.find('tbody').find_all('tr')
+        if not os.path.isfile(MyFiles.FILE_PATH_REQ_GROUP_2):
+            table_req_group_2 = tables[1]
+            table_rows = table_req_group_2.find('tbody').find_all('tr')
 
             columns = ['подсистемы_и_требования', '2Б', '2А']
 
@@ -155,11 +155,11 @@ def prepare_data_from_guidance_document():
 
                 data.append([v1, v2, v3])
 
-            write_csv(file_path_req_class_2, columns, data)
+            write_csv(MyFiles.FILE_PATH_REQ_GROUP_2, columns, data)
 
-        if not os.path.isfile(file_path_req_class_1):
-            table_req_class_1 = tables[2]
-            table_rows = table_req_class_1.find('tbody').find_all('tr')
+        if not os.path.isfile(MyFiles.FILE_PATH_REQ_GROUP_1):
+            table_req_group_1 = tables[2]
+            table_rows = table_req_group_1.find('tbody').find_all('tr')
 
             columns = ['подсистемы_и_требования', '1Д', '1Г', '1В', '1Б', '1А']
 
@@ -181,10 +181,13 @@ def prepare_data_from_guidance_document():
 
                 data.append([v1, v2, v3, v4, v5, v6])
 
-            write_csv(file_path_req_class_1, columns, data)
+            write_csv(MyFiles.FILE_PATH_REQ_GROUP_1, columns, data)
 
 
-def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame, significance_level: str, scale: str):
+def show_security_class_requirements(significance_level: str, scale: str):
+    df_isc = pd.read_csv(MyFiles.FILE_PATH_ISC, delimiter=';')
+    df_scr = pd.read_csv(MyFiles.FILE_PATH_SCR, delimiter=';')
+
     root = tk.Tk()
 
     root.attributes('-fullscreen', True)
@@ -194,6 +197,9 @@ def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame,
 
     text = tk.Text(root, padx=15, pady=15)
     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    button_back = tk.Button(root, text='Назад', command=root.destroy)
+    button_back.pack(side=tk.LEFT, fill=tk.Y)
 
     if significance_level not in ('УЗ 1', 'УЗ 2', 'УЗ 3') or scale not in (
             'федеральный', 'региональный', 'объектовый'):
@@ -212,16 +218,17 @@ def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame,
                     'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class,
                                                                                     stringIO.getvalue()))
 
-    button_back = tk.Button(root, text='Назад', command=root.destroy)
-    button_back.pack(side=tk.LEFT, fill=tk.Y)
-
     root.mainloop()
 
 
-def show_automated_system_requirements(df_req_class_1: pd.DataFrame, df_req_class_2: pd.DataFrame,
-                                       df_req_class_3: pd.DataFrame, privacy_level: str, power: str, mode: str):
-    root = tk.Tk()
+def show_automated_system_requirements(privacy_level: str, power: str, mode: str):
+    df_define_group = pd.DataFrame({'группа': [1, 2, 3],
+                                    'уровень_конфиденциальности': ['один', 'различный', 'различный'],
+                                    'равные_полномочие': ['да', 'да', 'нет'],
+                                    'режим_обработки': ['индивидуальный', 'коллективный', 'коллективный']})
+    print(df_define_group)
 
+    root = tk.Tk()
     root.attributes('-fullscreen', True)
 
     label = tk.Label(root, text='Требования по руководящему документу (Автоматизированные системы. Защита от '
@@ -231,36 +238,52 @@ def show_automated_system_requirements(df_req_class_1: pd.DataFrame, df_req_clas
     text = tk.Text(root, padx=15, pady=15)
     text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-    if privacy_level not in ('один', 'различный') or power not in ('да', 'нет') or mode not in ('индивидуальный', 'коллективный'):
-        text.insert(tk.END, 'Введены неверные данные!')
-    else:
-        automated_system_class = '?'
-        requirements = pd.DataFrame({})
-
-        stringIO = io.StringIO()
-        for index, row in requirements.iterrows():
-            subsystems_and_requirements = row['подсистемы_и_требования']
-            stringIO.write('- {}\n'.format(subsystems_and_requirements))
-
-        text.insert(tk.END,
-                    'Ваш класс АС:\n{}\nТребования по защите информации от НСД для АС:\n{}'.format(
-                        automated_system_class,
-                        stringIO.getvalue()))
-
     button_back = tk.Button(root, text='Назад', command=root.destroy)
     button_back.pack(side=tk.LEFT, fill=tk.Y)
+
+    if privacy_level not in ('один', 'различный') or power not in ('да', 'нет') or mode not in (
+            'индивидуальный', 'коллективный'):
+        text.insert(tk.END, 'Введены неверные данные!')
+    else:
+        automated_system_group = df_define_group.loc[(df_define_group['уровень_конфиденциальности'] == privacy_level) &
+                                                     (df_define_group['равные_полномочие'] == power) &
+                                                     (df_define_group['режим_обработки'] == mode), ['группа']]
+        if len(automated_system_group) < 1:
+            text.insert(tk.END, 'Введенные данные не удовлетворяют ни одной из групп АС!')
+        else:
+            automated_system_group = automated_system_group.values[0][0]
+
+            automated_system_class = ''
+            if automated_system_group == 1:
+                label1 = tk.Label(root, text='')
+                label1.pack()
+            elif automated_system_group == 2:
+                label1 = tk.Label(root, text='')
+                label1.pack()
+            elif automated_system_group == 3:
+                label1 = tk.Label(root, text='')
+                label1.pack()
+
+            file = getattr(MyFiles, f'FILE_PATH_REQ_GROUP_{automated_system_group}', None)
+            if file is None:
+                raise FileExistsError('Файл был удалён или перенесён в другую директорию!')
+            df_req_group = pd.read_csv(file, delimiter=';', keep_default_na=False, na_values='')
+            requirements = df_req_group.loc[df_req_group[automated_system_class], ['подсистемы_и_требования']]
+
+            stringIO = io.StringIO()
+            for index, row in requirements.iterrows():
+                subsystems_and_requirements = row['подсистемы_и_требования']
+                stringIO.write('- {}\n'.format(subsystems_and_requirements))
+
+            text.insert(tk.END,
+                        'Ваш класс АС:\n{}\nТребования по защите информации от НСД для АС:\n{}'.format(
+                            automated_system_group,
+                            stringIO.getvalue()))
 
     root.mainloop()
 
 
 def create_window():
-    df_isc = pd.read_csv(file_path_isc, delimiter=';')
-    df_scr = pd.read_csv(file_path_scr, delimiter=';')
-
-    df_req_class_1 = pd.read_csv(file_path_req_class_1, delimiter=';', keep_default_na=False, na_values='')
-    df_req_class_2 = pd.read_csv(file_path_req_class_2, delimiter=';', keep_default_na=False, na_values='')
-    df_req_class_3 = pd.read_csv(file_path_req_class_3, delimiter=';', keep_default_na=False, na_values='')
-
     root = tk.Tk()
 
     # Get the width and height of the screen
@@ -274,17 +297,17 @@ def create_window():
     # Set the position of the window
     root.geometry('600x400+%d+%d' % (x, y))
 
-    main_label = tk.Label(root, text='Информационная система')
+    main_label = tk.Label(root, text='\nТребования к мерам защиты информации, содержащейся в информационной системе\n')
     main_label.pack()
 
-    label1 = tk.Label(root, text='Выберите уровень значимости:')
+    label1 = tk.Label(root, text='Выберите уровень значимости информации:')
     label1.pack()
 
     significance_levels = ['УЗ 1', 'УЗ 2', 'УЗ 3']
     combo_significance_level = ttk.Combobox(root, values=significance_levels)
     combo_significance_level.pack()
 
-    label2 = tk.Label(root, text='Выберите масштаб:')
+    label2 = tk.Label(root, text='Выберите масштаб системы:')
     label2.pack()
 
     scales = ['федеральный', 'региональный', 'объектовый']
@@ -292,11 +315,14 @@ def create_window():
     combo_scale.pack()
 
     button = tk.Button(root, text='Вывести требования',
-                       command=lambda: show_security_class_requirements(df_isc, df_scr, combo_significance_level.get(),
+                       command=lambda: show_security_class_requirements(combo_significance_level.get(),
                                                                         combo_scale.get()))
     button.pack()
 
-    label3 = tk.Label(root, text='\nНаличие в АС информации различного уровня конфиденциальности:')
+    label3 = tk.Label(root, text='\nКлассификация AC и требования по защите информации\n')
+    label3.pack()
+
+    label3 = tk.Label(root, text='Наличие в АС информации различного уровня конфиденциальности:')
     label3.pack()
 
     privacy_levels = ['один', 'различный']
@@ -318,8 +344,7 @@ def create_window():
     combo_modes.pack()
 
     button = tk.Button(root, text='Вывести требования',
-                       command=lambda: show_automated_system_requirements(df_req_class_1, df_req_class_2,
-                                                                          df_req_class_3, combo_privacy_level.get(),
+                       command=lambda: show_automated_system_requirements(combo_privacy_level.get(),
                                                                           combo_power.get(), combo_modes.get()))
     button.pack()
 
