@@ -7,7 +7,6 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-url = 'https://fstec.ru/dokumenty/vse-dokumenty/prikazy/prikaz-fstek-rossii-ot-11-fevralya-2013-g-n-17'
 
 headers = {
     'accept': '*/*',
@@ -15,78 +14,94 @@ headers = {
                   'YaBrowser/23.3.1.895 Yowser/2.5 Safari/537.36 '
 }
 
-file_path_html = 'index.html'
-if not os.path.isfile(file_path_html):
+
+def pull_html(url: str, file_path: str) -> bool:
     # Отключение проверки сертификата SSL
     requests.packages.urllib3.disable_warnings()
     req = requests.get(url, headers=headers, verify=False)
     src = req.text
 
-    with open(file_path_html, mode='w', encoding='utf-8') as file:
-        file.write(src)
-del file_path_html
+    with open(file_path, mode='w', encoding='utf-8') as html_file:
+        html_file.write(src)
+    return True
+
+
+def write_csv(file_path: str, columns: list, data: list) -> bool:
+    with open(file_path, mode='w', encoding='utf-8-sig', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
+        writer.writerow(columns)
+        writer.writerows(data)
+    return True
+
 
 file_path_isc = 'data/information_security_class.csv'
 file_path_scr = 'data/security_class_requirements.csv'
-if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
-    with open('index.html', mode='r', encoding='utf-8') as file:
-        src = file.read()
 
-    soup = BeautifulSoup(src, 'lxml')
 
-    tables = soup.find_all('table', class_='sltable')
+def prepare_data_from_order():
+    url = 'https://fstec.ru/dokumenty/vse-dokumenty/prikazy/prikaz-fstek-rossii-ot-11-fevralya-2013-g-n-17'
 
-    if not os.path.isfile(file_path_isc):
-        table_isc = tables[0]
-        table_rows = table_isc.find('tbody').find_all('tr')
+    file_path_html_order = 'index_order.html'
+    if not os.path.isfile(file_path_html_order):
+        pull_html(url, file_path_html_order)
 
-        data = []
-        for row in table_rows:
-            attr_values = row.find_all('td')
+    if not os.path.isfile(file_path_isc) or not os.path.isfile(file_path_scr):
+        with open(file_path_html_order, mode='r', encoding='utf-8') as file:
+            src = file.read()
 
-            v1 = attr_values[0].text.replace(' ', ' ').strip()
-            v2 = attr_values[1].text.strip()
-            v3 = attr_values[2].text.strip()
-            v4 = attr_values[3].text.strip()
+        soup = BeautifulSoup(src, 'lxml')
 
-            data.append([v1, v2, v3, v4])
+        tables = soup.find_all('table', class_='sltable')
 
-        with open(file_path_isc, mode='w', encoding='utf-8-sig', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';')
+        if not os.path.isfile(file_path_isc):
+            table_isc = tables[0]
+            table_rows = table_isc.find('tbody').find_all('tr')
+
             columns = ['уровень_значимости', 'федеральный', 'региональный', 'объектовый']
-            writer.writerow(columns)
-            writer.writerows(data)
 
-    if not os.path.isfile(file_path_scr):
-        table_scr = tables[1]
-        table_rows = table_scr.find('tbody').find_all('tr')
+            data = []
+            for row in table_rows:
+                attr_values = row.find_all('td')
 
-        data = []
-        for row in table_rows:
-            attr_values = row.find_all('td')
+                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v2 = attr_values[1].text.strip()
+                v3 = attr_values[2].text.strip()
+                v4 = attr_values[3].text.strip()
 
-            if len(attr_values) != 5:
-                continue
+                data.append([v1, v2, v3, v4])
 
-            v1 = attr_values[0].text.replace(' ', ' ').strip()
-            v2 = attr_values[1].text.replace(' ', ' ').strip()
-            v3 = bool(attr_values[2].text.strip())
-            v4 = bool(attr_values[3].text.strip())
-            v5 = bool(attr_values[4].text.strip())
+            write_csv(file_path_isc, columns, data)
 
-            data.append([v1, v2, v3, v4, v5])
-        print(data)
-        with open(file_path_scr, mode='w', encoding='utf-8-sig', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';')
+        if not os.path.isfile(file_path_scr):
+            table_scr = tables[1]
+            table_rows = table_scr.find('tbody').find_all('tr')
+
             columns = ['номер_меры', 'мера_защиты', 'К3', 'К2', 'К1']
-            writer.writerow(columns)
-            writer.writerows(data)
 
-df_isc = pd.read_csv(file_path_isc, delimiter=';')
-df_scr = pd.read_csv(file_path_scr, delimiter=';')
+            data = []
+            for row in table_rows:
+                attr_values = row.find_all('td')
+
+                if len(attr_values) != 5:
+                    continue
+
+                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v2 = attr_values[1].text.replace(' ', ' ').strip()
+                v3 = bool(attr_values[2].text.strip())
+                v4 = bool(attr_values[3].text.strip())
+                v5 = bool(attr_values[4].text.strip())
+
+                data.append([v1, v2, v3, v4, v5])
+
+            write_csv(file_path_scr, columns, data)
 
 
-def show_security_class_requirements(*, significance_level: str, scale: str):
+def prepare_data_from_guidance_document():
+    url = 'https://fstec.ru/dokumenty/vse-dokumenty/spetsialnye-normativnye-dokumenty/rukovodyashchij-dokument-ot-30' \
+          '-marta-1992-g-3 '
+
+
+def show_security_class_requirements(df_isc: pd.DataFrame, df_scr: pd.DataFrame, significance_level: str, scale: str):
     root = tk.Tk()
     root.geometry('1000x1000')
 
@@ -110,7 +125,8 @@ def show_security_class_requirements(*, significance_level: str, scale: str):
             stringIO.write('- {}: {}\n'.format(number_measure, protective_measure))
 
         text.insert(tk.END,
-                    'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class, stringIO.getvalue()))
+                    'Ваш класс защищённости:\n{}\nТребования к системе:\n{}'.format(security_class,
+                                                                                    stringIO.getvalue()))
 
     button_back = tk.Button(root, text='Назад', command=root.destroy)
     button_back.pack(side=tk.LEFT, fill=tk.Y)
@@ -119,6 +135,9 @@ def show_security_class_requirements(*, significance_level: str, scale: str):
 
 
 def create_window():
+    df_isc = pd.read_csv(file_path_isc, delimiter=';')
+    df_scr = pd.read_csv(file_path_scr, delimiter=';')
+
     root = tk.Tk()
     root.geometry('500x300')
 
@@ -133,26 +152,27 @@ def create_window():
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     significance_levels = ['УЗ 1', 'УЗ 2', 'УЗ 3']
-    combo1 = ttk.Combobox(root, values=significance_levels)
-    combo1.pack()
+    combo_significance_level = ttk.Combobox(root, values=significance_levels)
+    combo_significance_level.pack()
 
     label2 = tk.Label(root, text='Выберите масштаб:')
     label2.pack()
 
     scales = ['федеральный', 'региональный', 'объектовый']
-    combo2 = ttk.Combobox(root, values=scales)
-    combo2.pack()
+    combo_scale = ttk.Combobox(root, values=scales)
+    combo_scale.pack()
 
     button = tk.Button(root, text='Вывести требования',
-                       command=lambda: show_security_class_requirements(significance_level=
-                                                                        combo1.get(),
-                                                                        scale=combo2.get()))
+                       command=lambda: show_security_class_requirements(df_isc, df_scr, combo_significance_level.get(),
+                                                                        combo_scale.get()))
     button.pack()
 
     root.mainloop()
 
 
 def main():
+    prepare_data_from_order()
+    prepare_data_from_guidance_document()
     create_window()
 
 
