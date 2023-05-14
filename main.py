@@ -36,7 +36,7 @@ class ReservedValuesInTables:
     COLUMNS_REQ_GROUP_2: tuple = ('подсистемы_и_требования', '2Б', '2А')
     COLUMNS_REQ_GROUP_3: tuple = ('подсистемы_и_требования', '3Б', '3А')
 
-    SIGNIFICANCE_LEVEL_VALUES: tuple = ('УЗ 1', 'УЗ 2', 'УЗ 3')
+    SIGNIFICANCE_LEVEL_VALUES: tuple = ('УЗ1', 'УЗ2', 'УЗ3')
     SCALE_VALUES: tuple = ('федеральный', 'региональный', 'объектовый')
     PRIVACY_LEVEL_VALUES: tuple = ('один', 'различный')
     POWER_VALUES: tuple = ('да', 'нет')
@@ -90,7 +90,7 @@ def prepare_data_from_order():
             for row in table_rows:
                 attr_values = row.find_all('td')
 
-                v1 = attr_values[0].text.replace(' ', ' ').strip()
+                v1 = ''.join([ch for ch in attr_values[0].text.strip() if ch != '\xa0'])
                 v2 = attr_values[1].text.strip()
                 v3 = attr_values[2].text.strip()
                 v4 = attr_values[3].text.strip()
@@ -110,8 +110,8 @@ def prepare_data_from_order():
                 if len(attr_values) != 5:
                     continue
 
-                v1 = attr_values[0].text.replace(' ', ' ').strip()
-                v2 = attr_values[1].text.replace(' ', ' ').strip()
+                v1 = attr_values[0].text.strip()
+                v2 = attr_values[1].text.strip()
                 v3 = bool(attr_values[2].text.strip())
                 v4 = bool(attr_values[3].text.strip())
                 v5 = bool(attr_values[4].text.strip())
@@ -147,10 +147,10 @@ def prepare_data_from_guidance_document():
             for row in table_rows[2:]:
                 attr_values = row.find_all('td')
 
-                v1 = attr_values[0].text.replace(' ', ' ').strip()
-                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v1 = attr_values[0].text.strip()
+                v2_attr = attr_values[1].text.strip()
                 v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
-                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3_attr = attr_values[2].text.strip()
                 v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
 
                 data.append([v1, v2, v3])
@@ -165,10 +165,10 @@ def prepare_data_from_guidance_document():
             for row in table_rows[2:]:
                 attr_values = row.find_all('td')
 
-                v1 = attr_values[0].text.replace(' ', ' ').strip()
-                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v1 = attr_values[0].text.strip()
+                v2_attr = attr_values[1].text.strip()
                 v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
-                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3_attr = attr_values[2].text.strip()
                 v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
 
                 data.append([v1, v2, v3])
@@ -183,16 +183,16 @@ def prepare_data_from_guidance_document():
             for row in table_rows[2:]:
                 attr_values = row.find_all('td')
 
-                v1 = attr_values[0].text.replace(' ', ' ').strip()
-                v2_attr = attr_values[1].text.replace(' ', ' ').strip()
+                v1 = attr_values[0].text.strip()
+                v2_attr = attr_values[1].text.strip()
                 v2 = True if v2_attr == '+' else False if v2_attr == '-' else None
-                v3_attr = attr_values[2].text.replace(' ', ' ').strip()
+                v3_attr = attr_values[2].text.strip()
                 v3 = True if v3_attr == '+' else False if v3_attr == '-' else None
-                v4_attr = attr_values[3].text.replace(' ', ' ').strip()
+                v4_attr = attr_values[3].text.strip()
                 v4 = True if v4_attr == '+' else False if v4_attr == '-' else None
-                v5_attr = attr_values[4].text.replace(' ', ' ').strip()
+                v5_attr = attr_values[4].text.strip()
                 v5 = True if v5_attr == '+' else False if v5_attr == '-' else None
-                v6_attr = attr_values[5].text.replace(' ', ' ').strip()
+                v6_attr = attr_values[5].text.strip()
                 v6 = True if v6_attr == '+' else False if v6_attr == '-' else None
 
                 data.append([v1, v2, v3, v4, v5, v6])
