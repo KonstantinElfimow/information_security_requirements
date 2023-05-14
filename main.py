@@ -14,14 +14,19 @@ headers = {
                   'YaBrowser/23.3.1.895 Yowser/2.5 Safari/537.36 '
 }
 
+BASE_FOLDER: str = 'data'
+
+if not os.path.exists(BASE_FOLDER):
+    os.makedirs(BASE_FOLDER)
+
 
 class MyFiles:
-    FILE_PATH_ISC: str = 'data/information_security_class.csv'
-    FILE_PATH_SCR: str = 'data/security_class_requirements.csv'
+    FILE_PATH_ISC: str = f'{BASE_FOLDER}/information_security_class.csv'
+    FILE_PATH_SCR: str = f'{BASE_FOLDER}/security_class_requirements.csv'
 
-    FILE_PATH_REQ_GROUP_1: str = 'data/requirements_group_1.csv'
-    FILE_PATH_REQ_GROUP_2: str = 'data/requirements_group_2.csv'
-    FILE_PATH_REQ_GROUP_3: str = 'data/requirements_group_3.csv'
+    FILE_PATH_REQ_GROUP_1: str = f'{BASE_FOLDER}/requirements_group_1.csv'
+    FILE_PATH_REQ_GROUP_2: str = f'{BASE_FOLDER}/requirements_group_2.csv'
+    FILE_PATH_REQ_GROUP_3: str = f'{BASE_FOLDER}/requirements_group_3.csv'
 
 
 class ReservedValuesInTables:
@@ -73,7 +78,7 @@ def prepare_data_from_order():
         with open(file_path_html_order, mode='r', encoding='utf-8') as file:
             src = file.read()
 
-        soup = BeautifulSoup(src, 'lxml')
+        soup = BeautifulSoup(src, 'html.parser')
 
         tables = soup.find_all('table', class_='sltable')
 
@@ -130,7 +135,7 @@ def prepare_data_from_guidance_document():
         with open(file_path_html_document, mode='r', encoding='utf-8') as file:
             src = file.read()
 
-        soup = BeautifulSoup(src, 'lxml')
+        soup = BeautifulSoup(src, 'html.parser')
 
         tables = soup.find_all('table', class_='sltable')
 
